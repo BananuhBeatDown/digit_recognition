@@ -85,3 +85,212 @@ def extract_labels(filename, num_images):
 
 training_labels = extract_labels(train_labels_filename, 60000)
 test_labels = extract_labels(test_labels_filename, 10000)
+
+# %%
+
+# Synthetic Dataset Creator (1 to 5 digits per 64x64 image)
+
+def synthetic_dataset_generator(dataset, labels, num_samples, new_size=64):
+    
+    trim_train_data = []
+    [trim_train_data.append(i[:, 5:25]) for i in dataset]
+    trim_train_data = np.array(trim_train_data)
+    dataset = trim_train_data
+    
+    synthetic_dataset = np.ndarray(shape=(num_samples, new_size, new_size, 1))
+    synthetic_labels = np.array([])
+    data_labels = np.array([])   
+    w = 0
+    while w < num_samples:
+        i = np.random.randint(1, 6)
+        if i == 1:
+            rand1 = np.random.randint(0, dataset.shape[0])
+            
+            filler = np.zeros(shape=(28, 4, 1)) - 0.5
+            filled_train_data = np.array([np.hstack((filler, dataset[rand1], filler))])
+
+            merged_train_data = np.ndarray(shape=(28, 28, 1), 
+                                           dtype=np.float32)
+
+            temp = np.hstack([filled_train_data[0]])
+            merged_train_data[:, :, :] = temp
+            temp_str = np.array([i, labels[rand1], 10, 10, 10, 10])
+            data_labels = np.append(data_labels, temp_str)
+
+            trial_train_dataset = []
+            trial_train_dataset = np.reshape(merged_train_data, (28, 28 * 1))
+
+            resized_train_dataset = np.ndarray(
+                        shape=(new_size, new_size))
+
+            temp = np.hstack(
+                        [scipy.misc.imresize(trial_train_dataset, (new_size, new_size))])
+
+            resized_train_dataset[:, :] = temp
+
+            resized_train_dataset_4d = np.reshape(
+                resized_train_dataset, (1, new_size, new_size, 1))
+
+            synthetic_dataset[w, :, :, :] = resized_train_dataset_4d
+            
+            w += 1
+            
+
+        elif i == 2:
+            rand1 = np.random.randint(0, dataset.shape[0])
+            rand2 = np.random.randint(0, dataset.shape[0])
+            
+            new_train_data = np.concatenate((dataset[rand1:rand1+1], dataset[rand2:rand2+1]), axis=0)
+            filler = np.zeros(shape=(6, 20, 1)) - 0.5
+            filled_train_data = np.array([np.vstack((filler, i, filler)) for i in new_train_data])
+
+
+            merged_train_data = np.ndarray(shape=(1, 40, 40, 1), 
+                                           dtype=np.float32)
+
+            temp = np.hstack([filled_train_data[0], filled_train_data[1]])
+            merged_train_data[:, :, :] = temp
+            temp_str = np.array([i, labels[rand1], labels[rand2], 10, 10, 10])
+            data_labels = np.append(data_labels, temp_str)
+
+            trial_train_dataset = []
+            trial_train_dataset = np.reshape(merged_train_data, (40, 40 * 1))
+
+            resized_train_dataset = np.ndarray(
+                        shape=(new_size, new_size))
+
+            temp = np.hstack(
+                        [scipy.misc.imresize(trial_train_dataset, (new_size, new_size))])
+
+            resized_train_dataset[:, :] = temp
+
+            resized_train_dataset_4d = np.reshape(
+                resized_train_dataset, (1, new_size, new_size, 1))
+
+            synthetic_dataset[w, :, :, :] = resized_train_dataset_4d
+            
+            w += 1
+
+            
+        elif i == 3:
+            rand1 = np.random.randint(0, dataset.shape[0])
+            rand2 = np.random.randint(0, dataset.shape[0])
+            rand3 = np.random.randint(0, dataset.shape[0])
+                
+            new_train_data = np.concatenate((dataset[rand1:rand1+1], dataset[rand2:rand2+1], 
+                                                dataset[rand3:rand3+1]), axis=0)
+            filler = np.zeros(shape=(16, 20, 1)) - 0.5
+            filled_train_data = np.array([np.vstack((filler, i, filler)) 
+                                          for i in new_train_data])
+
+            merged_train_data = np.ndarray(shape=(60, 60, 1), 
+                                           dtype=np.float32)
+
+            temp = np.hstack([filled_train_data[0], filled_train_data[1], filled_train_data[2]])
+            merged_train_data[:, :, :] = temp
+            temp_str = np.array([i, labels[rand1], labels[rand2], labels[rand3], 10, 10])
+            data_labels = np.append(data_labels, temp_str)
+
+            trial_train_dataset = []
+            trial_train_dataset = np.reshape(merged_train_data, (60, 60 * 1))
+
+            resized_train_dataset = np.ndarray(
+                        shape=(new_size, new_size))
+
+            temp = np.hstack(
+                        [scipy.misc.imresize(trial_train_dataset, (new_size, new_size))])
+
+            resized_train_dataset[:, :] = temp
+
+            resized_train_dataset_4d = np.reshape(
+                resized_train_dataset, (1, new_size, new_size, 1))
+
+            synthetic_dataset[w, :, :, :] = resized_train_dataset_4d
+            
+            w += 1
+
+        elif i == 4:
+            rand1 = np.random.randint(0, dataset.shape[0])
+            rand2 = np.random.randint(0, dataset.shape[0])
+            rand3 = np.random.randint(0, dataset.shape[0])
+            rand4 = np.random.randint(0, dataset.shape[0])
+            
+            filled_train_data = np.concatenate((dataset[rand1:rand1+1], dataset[rand2:rand2+1], 
+                                                dataset[rand3:rand3+1], dataset[rand4:rand4+1]), axis=0)
+            filler = np.zeros(shape=(26, 20, 1)) - 0.5
+            filled_train_data = np.array([np.vstack((filler, i, filler)) for i in filled_train_data])
+
+            merged_train_data = np.ndarray(shape=(80, 80, 1), 
+                                           dtype=np.float32)
+
+            temp = np.hstack([filled_train_data[0], filled_train_data[1], filled_train_data[2],
+                             filled_train_data[3]])
+            merged_train_data[:, :, :] = temp
+            temp_str = np.array([i, labels[rand1], labels[rand2], labels[rand3], labels[rand4], 10])
+            data_labels = np.append(data_labels, temp_str)
+
+            trial_train_dataset = []
+            trial_train_dataset = np.reshape(merged_train_data, (80, 80 * 1))
+
+            resized_train_dataset = np.ndarray(
+                        shape=(new_size, new_size))
+
+            temp = np.hstack(
+                        [scipy.misc.imresize(trial_train_dataset, (new_size, new_size))])
+
+            resized_train_dataset[:, :] = temp
+
+            resized_train_dataset_4d = np.reshape(
+                resized_train_dataset, (1, new_size, new_size, 1))
+
+            synthetic_dataset[w, :, :, :] = resized_train_dataset_4d
+            
+            w += 1
+
+        else:
+            rand1 = np.random.randint(0, dataset.shape[0])
+            rand2 = np.random.randint(0, dataset.shape[0])
+            rand3 = np.random.randint(0, dataset.shape[0])
+            rand4 = np.random.randint(0, dataset.shape[0])
+            rand5 = np.random.randint(0, dataset.shape[0])
+            
+            filled_train_data = np.concatenate((dataset[rand1:rand1+1], dataset[rand2:rand2+1],
+                                                dataset[rand3:rand3+1],dataset[rand4:rand4+1],
+                                                dataset[rand5:rand5+1]), axis=0)
+
+            filler = np.zeros(shape=(36, 20, 1)) - 0.5
+            filled_train_data = np.array([np.vstack((filler, i, filler)) 
+                                          for i in filled_train_data])
+            
+            merged_train_data = np.ndarray(shape=(100, 100, 1), 
+                                           dtype=np.float32)
+
+            temp = np.hstack([filled_train_data[0], filled_train_data[1], filled_train_data[2],
+                             filled_train_data[3], filled_train_data[4]])
+            merged_train_data[:, :, :] = temp
+            temp_str = np.array([i, labels[rand1], labels[rand2], labels[rand3], labels[rand4], labels[rand5]])
+            data_labels = np.append(data_labels, temp_str)
+
+            trial_train_dataset = []
+            trial_train_dataset = np.reshape(merged_train_data, (100, 100 * 1))
+
+            resized_train_dataset = np.ndarray(
+                        shape=(new_size, new_size))
+
+            temp = np.hstack(
+                        [scipy.misc.imresize(trial_train_dataset, (new_size, new_size))])
+
+            resized_train_dataset[:, :] = temp
+
+            resized_train_dataset_4d = np.reshape(
+                resized_train_dataset, (1, new_size, new_size, 1))
+
+            synthetic_dataset[w, :, :, :] = resized_train_dataset_4d
+            
+            w += 1
+
+    # This belongs here
+    synthetic_labels = np.reshape(data_labels, (-1, 6))
+
+    return synthetic_dataset, synthetic_labels
+
