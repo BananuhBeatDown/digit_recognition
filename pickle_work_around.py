@@ -6,6 +6,9 @@ Created on Sun Jun 18 16:55:43 2017
 @author: matthew_green
 """
 
+# Used to fix pickle not saving or loading files
+# bigger than 4 GB.
+
 import pickle
 
 class MacOSFile(object):
