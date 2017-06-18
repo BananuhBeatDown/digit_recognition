@@ -69,3 +69,19 @@ def extract_data(filename, num_images):
 
 train_data = extract_data(train_data_filename, 60000)
 test_data = extract_data(test_data_filename, 10000)
+
+# %%
+
+def extract_labels(filename, num_images):
+  """Extract the labels."""
+  print('Extracting', filename)
+  with gzip.open(filename) as bytestream:
+    # Skip the magic number and count; we know these values.
+    bytestream.read(8)
+    
+    buf = bytestream.read(1 * num_images)
+    labels = np.frombuffer(buf, dtype=np.uint8)
+  return labels
+
+training_labels = extract_labels(train_labels_filename, 60000)
+test_labels = extract_labels(test_labels_filename, 10000)
