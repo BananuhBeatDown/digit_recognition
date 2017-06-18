@@ -317,3 +317,26 @@ def displaySequence(n):
 
 #display random sample to check if data is ok after creating sequences
 displaySequence(random.randint(0, train_dataset.shape[0]))
+
+# %%
+
+# Save the datasets as individually
+# labelled features in a pickle file. 
+
+pickle_file = '/Users/matthew_green/Desktop/version_control/digit_recognition/metas/MNIST_multi_64.pickle'
+
+save = {
+    'train_dataset': train_dataset,
+    'train_labels': train_labels,
+    'valid_dataset': valid_dataset,
+    'valid_labels': valid_labels,
+    'test_dataset': test_dataset,
+    'test_labels': test_labels,
+    }
+
+pickle_dump(save, pickle_file)
+
+statinfo = os.stat(pickle_file)
+print('Compressed pickle size:', statinfo.st_size)
+
+
