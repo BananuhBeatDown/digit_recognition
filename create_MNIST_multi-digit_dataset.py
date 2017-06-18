@@ -305,3 +305,15 @@ test_dataset, test_labels = synthetic_dataset_generator(test_data, test_labels, 
 print(train_dataset.shape, train_labels.shape)
 print(valid_dataset.shape, valid_labels.shape)
 print(test_dataset.shape, test_labels.shape)
+
+# %%
+
+# Test display of the new images from the train_dataset
+
+def displaySequence(n):
+    plt.imshow(train_dataset[n].reshape(64, 64), cmap=plt.cm.Greys)
+    plt.show()
+    print ('Label : {}'.format(train_labels[n], cmap=plt.cm.Greys))
+
+#display random sample to check if data is ok after creating sequences
+displaySequence(random.randint(0, train_dataset.shape[0]))
