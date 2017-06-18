@@ -294,3 +294,14 @@ def synthetic_dataset_generator(dataset, labels, num_samples, new_size=64):
 
     return synthetic_dataset, synthetic_labels
 
+# %%
+
+# Create multi-digit train, valid, and test datasets and labels
+
+train_dataset, train_labels = synthetic_dataset_generator(train_data, training_labels, 50000)
+valid_dataset, valid_labels = synthetic_dataset_generator(train_data, training_labels, 9000)
+test_dataset, test_labels = synthetic_dataset_generator(test_data, test_labels, len(test_data))
+
+print(train_dataset.shape, train_labels.shape)
+print(valid_dataset.shape, valid_labels.shape)
+print(test_dataset.shape, test_labels.shape)
