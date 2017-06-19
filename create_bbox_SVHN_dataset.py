@@ -156,3 +156,18 @@ class DigitStructFile:
             item['boxes'] = figures
             result.append(item)
         return result
+    
+# %%
+
+fin = os.path.join(train_folders, 'digitStruct.mat')
+dsf = DigitStructFile(fin)
+train_data = dsf.getAllDigitStructure_ByDigit()
+
+fin = os.path.join(test_folders, 'digitStruct.mat')
+dsf = DigitStructFile(fin)
+test_data = dsf.getAllDigitStructure_ByDigit()
+
+fin = os.path.join(extra_folders, 'digitStruct.mat')
+dsf = DigitStructFile(fin)
+extra_data = dsf.getAllDigitStructure_ByDigit()
+
