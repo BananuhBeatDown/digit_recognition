@@ -24,8 +24,6 @@ import random
 path = '/Users/matthew_green/Desktop/version_control/digit_recognition'
 os.chdir(path)
 
-# %%
-
 url = 'http://ufldl.stanford.edu/housenumbers/'
 last_percent_reported = None
 
