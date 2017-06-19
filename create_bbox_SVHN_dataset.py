@@ -287,3 +287,22 @@ print(test_dataset.shape, test_labels.shape, test_bbox.shape)
 extra_dataset, extra_labels, extra_bbox = generate_dataset(extra_data, extra_folders)
 print(extra_dataset.shape, extra_labels.shape, extra_bbox.shape)
 
+# %%
+
+def displaySequence_test(n):
+    fig,ax=plt.subplots(1)
+    plt.imshow(test_dataset[n].reshape(64, 64), cmap=plt.cm.Greys)
+    
+    for i in np.arange(4):
+        rect = patches.Rectangle((test_bbox[n][1][i], test_bbox[n][0][i]),
+                                  test_bbox[n][3][i], test_bbox[n][2][i],
+                                  linewidth=1,edgecolor='r',facecolor='none')
+        
+        ax.add_patch(rect)                               
+    plt.show
+    
+    print ('Label : {}'.format(test_labels[n], cmap=plt.cm.Greys), n)
+    print(n)
+    
+# display random sample to check if data is ok after creating sequences
+displaySequence_test(random.randint(0, test_dataset.shape[0] - 1))
