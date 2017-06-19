@@ -306,3 +306,39 @@ def displaySequence_test(n):
     
 # display random sample to check if data is ok after creating sequences
 displaySequence_test(random.randint(0, test_dataset.shape[0] - 1))
+
+# %%
+
+# Create new training and valid datasets by mixing original training and valid datasets
+random.seed()
+
+n_labels = 10
+valid_index = []
+valid_index2 = []
+train_index = []
+train_index2 = []
+for i in np.arange(n_labels):
+    valid_index.extend(np.where(train_labels[:,1] == (i))[0][:400].tolist())
+    train_index.extend(np.where(train_labels[:,1] == (i))[0][400:].tolist())
+    valid_index2.extend(np.where(extra_labels[:,1] == (i))[0][:200].tolist())
+    train_index2.extend(np.where(extra_labels[:,1] == (i))[0][200:].tolist())
+    
+    
+random.shuffle(valid_index)
+random.shuffle(train_index)
+random.shuffle(valid_index2)
+random.shuffle(train_index2)
+
+
+valid_bbox = np.concatenate((extra_bbox[valid_index2,:,:], train_bbox[valid_index,:,:]), axis=0)
+valid_dataset = np.concatenate((extra_dataset[valid_index2,:,:,:], train_dataset[valid_index,:,:,:]), axis=0)
+valid_labels = np.concatenate((extra_labels[valid_index2,:], train_labels[valid_index,:]), axis=0)
+train_bbox_t = np.concatenate((extra_bbox[train_index2,:,:], train_bbox[train_index,:,:]), axis=0)
+train_dataset_t = np.concatenate((extra_dataset[train_index2,:,:,:], train_dataset[train_index,:,:,:]), axis=0)
+train_labels_t = np.concatenate((extra_labels[train_index2,:], train_labels[train_index,:]), axis=0)
+
+
+
+print(train_dataset_t.shape, train_labels_t.shape, train_bbox_t.shape)
+print(test_dataset.shape, test_labels.shape, test_bbox.shape)
+print(valid_dataset.shape, valid_labels.shape, valid_bbox.shape)
