@@ -16,9 +16,8 @@ import numpy as np
 import os
 import sys
 import tarfile
-
+from pickle_work_around import pickle_dump
 from six.moves.urllib.request import urlretrieve
-from six.moves import cPickle as pickle
 import random
 
 path = '/Users/matthew_green/Desktop/version_control/digit_recognition'
@@ -342,3 +341,25 @@ train_labels_t = np.concatenate((extra_labels[train_index2,:], train_labels[trai
 print(train_dataset_t.shape, train_labels_t.shape, train_bbox_t.shape)
 print(test_dataset.shape, test_labels.shape, test_bbox.shape)
 print(valid_dataset.shape, valid_labels.shape, valid_bbox.shape)
+
+# %%
+
+# Save dataset features to pickle file for later use
+pickle_file = '/Users/matthew_green/Desktop/version_control/digit_recognition/metas/SVHN_multi_bbox_64.pickle'
+
+save = {
+    'train_bbox': train_bbox_t,
+    'train_dataset': train_dataset_t,
+    'train_labels': train_labels_t,
+    'valid_bbox': valid_bbox,
+    'valid_dataset': valid_dataset,
+    'valid_labels': valid_labels,
+    'test_bbox': test_bbox,
+    'test_dataset': test_dataset,
+    'test_labels': test_labels,
+    }
+
+pickle_dump(save, pickle_file)
+
+statinfo = os.stat(pickle_file)
+print('Compressed pickle size:', statinfo.st_size)
