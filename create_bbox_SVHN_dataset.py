@@ -179,3 +179,111 @@ train_data = np.delete(train_data, 29929, axis=0) # 6-digits
 
 extra_data = np.delete(extra_data, 43926, axis=0) # bad-pic
 
+# %%
+
+train_folders = 'train'
+test_folders = 'test'
+extra_folders = 'extra'
+
+np.set_printoptions(suppress=True)
+import PIL.Image as Image
+image_size = 64
+
+
+
+def generate_dataset(data, folder):
+    
+    bbox_dataset = np.ndarray([len(data), 4, 5], dtype='float32')
+    dataset = np.ndarray([len(data),image_size,image_size,1], dtype='float32')
+    labels = np.ones([len(data),6], dtype=int) * 10
+    for i in np.arange(len(data)):
+        filename = data[i]['filename']
+        if os.path.isfile(os.path.join(folder, filename)) == False:
+            pass
+        else:
+            fullname = os.path.join(folder, filename)
+            im = Image.open(fullname)
+            boxes = data[i]['boxes']
+            num_digit = len(boxes)
+            
+            labels[i,0] = num_digit
+            top = np.ndarray([num_digit], dtype='float32')
+            left = np.ndarray([num_digit], dtype='float32')
+            height = np.ndarray([num_digit], dtype='float32')
+            width = np.ndarray([num_digit], dtype='float32')
+            for j in np.arange(num_digit):
+                if j < 5: 
+                    labels[i,j+1] = boxes[j]['label']
+                    if boxes[j]['label'] == 10: labels[i,j+1] = 0
+                else: print('#',i,'image has more than 5 digits.')
+                top[j] = boxes[j]['top']
+                
+                left[j] = boxes[j]['left']
+                height[j] = boxes[j]['height']
+                width[j] = boxes[j]['width']
+    
+            im_btop = np.amin(top)
+            im_bleft = np.amin(left)
+            im_bheight = np.amax(top) + height[np.argmax(top)] - im_btop
+            im_bwidth = np.amax(left) + width[np.argmax(left)] - im_bleft
+            
+            im_top = im_btop - 0.15 * im_bheight
+            im_left = im_bleft - 0.15 * im_bwidth
+            im_bottom = np.amin([(im_btop + 1.15 * im_bheight), im.size[1]])
+            im_right = np.amin([(im_bleft + 1.15 * im_bwidth), im.size[0]])
+            # print(im_top, im_left, im_bottom, im_right)
+            # print(im.size)
+            
+            top_ratio = top - im_top
+            left_ratio = left - im_left
+            top_ratio = top_ratio / (im_bottom - im_top) * image_size
+            left_ratio = left_ratio / (im_right - im_left) * image_size
+            
+            height_ratio = (height / (im_bottom - im_top)) * image_size
+            width_ratio = (width / (im_right - im_left)) * image_size
+        
+            
+            # print(top_ratio, left_ratio, height_ratio, width_ratio)
+            bbox = [top_ratio, left_ratio, height_ratio, width_ratio]
+            bbox_single = np.ones(shape=(4, 5)) * -15.
+            bbox_single[2:] = bbox_single[2:] + 25.
+            for k in np.arange(4):
+                if type(bbox[k]) == float:
+                    bbox_single[k][0] = bbox[k]
+                else:
+                    while len(bbox[k]) < 5:
+                        bbox[k] = np.append(bbox[k], -15.)
+            if bbox_single[0].sum() != -75.:
+                bbox = bbox_single
+            else:
+                bbox = np.array(bbox)
+            for l in range(1, 5):
+                if bbox[2][l] == -15.0:
+                    bbox[2][l] = 10.0
+                if bbox[3][l] == -15.0:
+                    bbox[3][l] = 10.0
+            
+            # print(bbox)
+            bbox_dataset[i, :, :] = bbox[:, :]
+            # print(bbox_dataset[i])
+            
+            im = im.crop((int(np.floor(im_left)), int(np.floor(im_top)), int(np.floor(im_right)),
+                          int(np.floor(im_bottom)))).resize([image_size, image_size], Image.ANTIALIAS)
+            im = np.dot(np.array(im, dtype='float32'), [[0.2989],[0.5870],[0.1140]]) # Changes RGB to grey-scale
+            mean = np.mean(im, dtype='float32')
+            std = np.std(im, dtype='float32', ddof=1)
+            if std < 1e-4: std = 1.
+            im = (im - mean) / std
+            dataset[i,:,:,:] = im[:,:,:]
+        
+    return dataset, labels, bbox_dataset
+
+train_dataset, train_labels, train_bbox = generate_dataset(train_data, train_folders)
+print(train_dataset.shape, train_labels.shape, train_bbox.shape)
+
+test_dataset, test_labels, test_bbox = generate_dataset(test_data, test_folders)
+print(test_dataset.shape, test_labels.shape, test_bbox.shape)
+
+extra_dataset, extra_labels, extra_bbox = generate_dataset(extra_data, extra_folders)
+print(extra_dataset.shape, extra_labels.shape, extra_bbox.shape)
+
