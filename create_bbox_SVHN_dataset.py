@@ -171,3 +171,11 @@ fin = os.path.join(extra_folders, 'digitStruct.mat')
 dsf = DigitStructFile(fin)
 extra_data = dsf.getAllDigitStructure_ByDigit()
 
+    
+# %%
+
+# Remove 6-digit pic and bad-pic from dataset
+train_data = np.delete(train_data, 29929, axis=0) # 6-digits
+
+extra_data = np.delete(extra_data, 43926, axis=0) # bad-pic
+
