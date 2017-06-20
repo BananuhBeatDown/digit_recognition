@@ -107,3 +107,23 @@ def neural_net_keep_prob_input():
 
 tf.reset_default_graph()
 
+# %%
+
+# CONVOLUTION AND POOLING LAYER
+
+def conv2d_maxpool(x_tensor, conv_num_outputs, conv_ksize, conv_strides, pool_ksize, pool_strides):
+    weight = tf.Variable(
+                 tf.truncated_normal(
+                     shape=[conv_ksize[0], conv_ksize[1], x_tensor.get_shape().as_list()[3], conv_num_outputs],
+                     mean=0.0,
+                     stddev=0.1))
+    bias = tf.Variable(tf.zeros(shape=conv_num_outputs))
+    
+    conv = tf.nn.conv2d(x_tensor, weight, strides=[1, conv_strides[0], conv_strides[1], 1], padding='SAME')
+    hidden = tf.nn.relu(conv + bias)
+    pool = tf.nn.max_pool(hidden,
+                         ksize=[1, pool_ksize[0], pool_ksize[1], 1],
+                         strides=[1, pool_strides[0], pool_strides[1], 1],
+                         padding='SAME')
+    return pool
+
