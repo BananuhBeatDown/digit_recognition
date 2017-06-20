@@ -37,11 +37,11 @@ print('Test set', test_dataset.shape, test_labels.shape, test_bbox.shape)
 
 # %%
     
-# Digit and Bounding Box Display Test
+# DIGIT AND BOUNDING BOX DISPLAY TEST:
 
 def displaySequence_test(n):
     fig,ax=plt.subplots(1)
-    plt.imshow(train_dataset[n].reshape(32, 32), cmap=plt.cm.Greys)
+    plt.imshow(train_dataset[n].reshape(64, 64), cmap=plt.cm.Greys)
     
     for i in np.arange(4):
         rect = patches.Rectangle((train_bbox[n][1][i], train_bbox[n][0][i]),
@@ -49,11 +49,11 @@ def displaySequence_test(n):
                                   linewidth=1,edgecolor='r',facecolor='none')
         
         ax.add_patch(rect)
+                                 
+            
     plt.show
-    
     print ('Label : {}'.format(train_labels[n], cmap=plt.cm.Greys), n)
     print(n)
-    
 # display random sample to check if data is ok after creating sequences
 # displaySequence_test(random.randint(0, train_dataset.shape[0]))
 displaySequence_test(random.randint(0, train_dataset.shape[0] - 1))
