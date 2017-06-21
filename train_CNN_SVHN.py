@@ -120,3 +120,26 @@ def output(x_tensor, num_outputs):
     logits4 = tf.matmul(x_tensor, weight_variable(x_tensor, num_outputs)) + bias_variable(num_outputs)
     logits5 = tf.matmul(x_tensor, weight_variable(x_tensor, num_outputs)) + bias_variable(num_outputs)
     return [logits1, logits2, logits3, logits4, logits5]
+
+# %%
+
+# CREATE A CONVOLUTION MODEL METHOD
+
+depth1 = 64
+depth2 = 128
+depth3 = 256
+depth_full1 = 512
+depth_full2 = 256
+classes = 11
+
+
+def conv_net(x, keep_prob):
+    model = conv2d_maxpool(x, depth1, (3,3), (1,1), (2,2), (2,2))
+    model = conv2d_maxpool(model, depth2, (3,3), (1,1), (2,2), (2,2))
+    model = conv2d_maxpool(model, depth3, (3,3), (1,1), (2,2), (2,2))
+    model = flatten(model)
+    model = fully_conn(model, depth_full1)
+    model = tf.nn.dropout(model, keep_prob)
+    model = fully_conn(model, depth_full2)
+    return output(model, classes)
+
