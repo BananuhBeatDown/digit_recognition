@@ -95,6 +95,15 @@ def flatten(x_tensor):
 
 # %%
 
+# FULLY CONNECTED LAYER:
+
+def fully_conn(x_tensor, num_outputs):
+    weight = tf.Variable(tf.truncated_normal(shape=[x_tensor.get_shape().as_list()[1], num_outputs], mean=0.0, stddev=0.1)) 
+    bias = tf.Variable(tf.zeros(shape=num_outputs))
+    return tf.nn.relu(tf.matmul(x_tensor, weight) + bias)
+
+# %%
+
 # OUTPUT LAYER:
     
 def weight_variable(x_tensor, num_outputs):
