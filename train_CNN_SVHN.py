@@ -143,3 +143,58 @@ def conv_net(x, keep_prob):
     model = fully_conn(model, depth_full2)
     return output(model, classes)
 
+# %%
+
+# BUILD THE NEURAL NETWORK
+
+# Remove previous weights, bias, inputs, etc..
+tf.reset_default_graph()
+
+
+# Inputs
+x = neural_net_image_input((64, 64, 1))
+y = neural_net_label_input(11)
+keep_prob = neural_net_keep_prob_input()
+
+
+# Model
+[logits1, logits2, logits3, logits4, logits5] = conv_net(x, keep_prob)
+
+
+# Name logits Tensor, so that is can be loaded from disk after training
+logits1 = tf.identity(logits1, name='logits1')
+logits2 = tf.identity(logits2, name='logits2')
+logits3 = tf.identity(logits3, name='logits3')
+logits4 = tf.identity(logits4, name='logits4')
+logits5 = tf.identity(logits5, name='logits5')
+
+
+# Loss and Optimizer
+cost = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits1, labels=y[:, 1])) + \
+                          tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits2, labels=y[: ,2])) + \
+                          tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits3, labels=y[: ,3])) + \
+                          tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits4, labels=y[: ,4])) + \
+                          tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits5, labels=y[: ,5]))
+
+
+global_step = tf.Variable(0)
+learning_rate = tf.train.exponential_decay(0.05, global_step, 100000, 0.95)
+optimizer = tf.train.AdagradOptimizer(learning_rate).minimize(loss, global_step=global_step)
+
+
+# Accuracy
+correct_pred = tf.equal([logits1, logits2, logits3, logits4, logits5], [y[1], y[2], y[3], y[4], y[5]])
+accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32), name='accuracy')
+
+# %%
+
+# TRAINING METHOD
+
+def train_neural_network(session, optimizer, keep_probability, feature_batch, label_batch, bbox_batch):
+    feed_dict = {
+            x: feature_batch, 
+            y: label_batch, 
+            keep_prob: keep_probability,
+            bbox: bbox_batch}
+    session.run(optimizer, feed_dict=feed_dict)
+    
