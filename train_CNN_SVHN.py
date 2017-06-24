@@ -197,4 +197,17 @@ def train_neural_network(session, optimizer, keep_probability, feature_batch, la
             keep_prob: keep_probability,
             bbox: bbox_batch}
     session.run(optimizer, feed_dict=feed_dict)
+
+# %%
+    
+def print_stats(session, feature_batch, label_batch, cost, accuracy):
+    current_cost = session.run(
+        cost,
+        feed_dict={x: feature_batch, y: label_batch, keep_prob: 1.})
+    valid_accuracy = session.run(
+        accuracy,
+        feed_dict={x: valid_features, y: valid_labels, keep_prob: 1.})
+    print('Loss: {:<8.3} Valid Accuracy: {:<5.3}'.format(
+        current_cost,
+        valid_accuracy))
     
