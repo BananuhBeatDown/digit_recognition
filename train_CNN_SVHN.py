@@ -211,3 +211,37 @@ def print_stats(session, feature_batch, label_batch, cost, accuracy):
         current_cost,
         valid_accuracy))
     
+# %%
+
+# %%
+
+steps = 20000
+
+with tf.Session(graph=graph) as sess:
+    tf.global_variables_initializer().run()
+    print("Initialized")
+    for step in range(steps):
+        offset = (step * batch_size) % (train_labels.shape[0] - batch_size)
+        batch_data = train_dataset[offset:(offset + batch_size), :, :, :]
+        batch_labels = train_labels[offset:(offset + batch_size), :]
+        batch_bbox = clean_train_bbox[offset:(offset + batch_size), :]
+        feed_dict = {tf_train_dataset : batch_data, tf_train_labels : batch_labels, tf_train_bbox: batch_bbox}
+        _, l, predictions, bbox_preds = sess.run(
+            [optimizer, loss, train_prediction, train_bbox_pred], feed_dict=feed_dict)
+        if step % 200 == 0:
+            print('Minibatch loss at step {}: {:.3f}'.format(step, l))
+            print('Minibatch accuracy: {:.3f}%'.format(accuracy(predictions, batch_labels[:, 1:6])))
+            print('Minibatch Bounding Box accuracy: {:.3f}%'.format(
+                    bb_intersection_over_union(bbox_preds, batch_bbox)))
+            print('Validation accuracy: {:.3f}%'.format(accuracy(valid_prediction.eval(), valid_labels[:, 1:6])))
+            print('Validation Bounding Box accuracy: {:.3f}%'.format(
+                           bb_intersection_over_union(valid_bbox_pred.eval(), clean_valid_bbox)))
+    print('Test accuracy: {0:.3f}%'.format(accuracy(test_prediction.eval(), test_labels[:, 1:6])))
+    print('Test Bounding Box accuracy: {:.3f}%'.format(
+                    bb_intersection_over_union(test_bbox_pred.eval(), clean_test_bbox)))
+    
+    # Save the variables to disk
+    save_path = saver.save(sess, "C:/Users/Matt Green/Desktop/digit_recognition/metas/bbox_model")
+    print("Model save in file: {}".format(save_path))    
+    
+    
