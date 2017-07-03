@@ -170,7 +170,7 @@ logits5 = tf.identity(logits5, name='logits5')
 
 
 # Loss and Optimizer
-cost = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits1, labels=y[:, 1])) + \
+loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits1, labels=y[:, 1])) + \
                           tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits2, labels=y[: ,2])) + \
                           tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits3, labels=y[: ,3])) + \
                           tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits4, labels=y[: ,4])) + \
@@ -194,8 +194,7 @@ def train_neural_network(session, optimizer, keep_probability, feature_batch, la
     feed_dict = {
             x: feature_batch, 
             y: label_batch, 
-            keep_prob: keep_probability,
-            bbox: bbox_batch}
+            keep_prob: keep_probability}
     session.run(optimizer, feed_dict=feed_dict)
 
 # %%
