@@ -9,9 +9,6 @@ Created on Tue Jun 20 19:47:41 2017
 from __future__ import print_function
 from pickle_work_around import pickle_load
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-import numpy as np
-import os
 import tensorflow as tf
 import random
 
@@ -123,11 +120,11 @@ def output(x_tensor, num_outputs):
 
 # CREATE A CONVOLUTION MODEL METHOD
 
-depth1 = 64
-depth2 = 128
-depth3 = 256
-depth_full1 = 512
-depth_full2 = 256
+depth1 = 16
+depth2 = 32
+depth3 = 64
+depth_full1 = 128
+depth_full2 = 64
 classes = 11
 
 
@@ -176,11 +173,7 @@ loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logi
 
 # %%
 
-prediction = tf.stack([tf.nn.softmax(conv_net(x, 1)[0]),
-                               tf.nn.softmax(conv_net(x, 1)[1]),
-                               tf.nn.softmax(conv_net(x, 1)[2]),
-                               tf.nn.softmax(conv_net(x, 1)[3]),
-                               tf.nn.softmax(conv_net(x, 1)[4])])
+prediction = tf.stack([logits1, logits2, logits3, logits4, logits5])
 
 prediction = tf.transpose(tf.argmax(prediction, 2))
 
@@ -218,19 +211,25 @@ def print_stats(session, feature_batch, label_batch, loss, accuracy):
     valid_accuracy = session.run(
         accuracy,
         feed_dict={x: valid_dataset, y: valid_labels, keep_prob: 1.})
-    print('Loss: {:<8.3} Valid Accuracy: {:<5.3}'.format(
+    
+    test_accuracy = session.run(
+        accuracy,
+        feed_dict={x: test_dataset, y: test_labels, keep_prob: 1.})
+    
+    print(' Loss: {:<8.3} Valid Accuracy: {:<5.3}% Test Accuracy: {:<5.3}%'.format(
        current_cost,
-        valid_accuracy))
+       valid_accuracy * 100,
+       test_accuracy * 100))
 
 # %%
 
-epochs = 5
+epochs = 1001
 batch_size = 128
-keep_probability = 0.7
+keep_probability = 0.9375
 
 # %%
 
-save_model_path = './digit_reocgnition'
+save_model_path = 'metas/my_model'
 
 with tf.Session() as sess:
     # Initializing the variables
@@ -242,11 +241,33 @@ with tf.Session() as sess:
         batch_features = train_dataset[offset:(offset + batch_size), :, :, :]
         batch_labels = train_labels[offset:(offset + batch_size), :]
         train_neural_network(sess, optimizer, keep_probability, batch_features, batch_labels)
-        print('Epoch {:>2} '.format(epoch + 1), end='')
-        print_stats(sess, batch_features, batch_labels, loss, accuracy)
+        if epoch % 200 == 0:
+            print('Epoch {:>2}'.format(epoch + 1), end='')
+            print_stats(sess, batch_features, batch_labels, loss, accuracy)
     
     
     # Save Model
     saver = tf.train.Saver()
     save_path = saver.save(sess, save_model_path)
     
+# %%
+
+with tf.Session() as sess:
+    new_saver = tf.train.import_meta_graph('metas/my-model.meta')
+    new_saver.restore(sess, tf.train.latest_checkpoint('metas'))
+    print("Model restored.")  
+    
+    print("Initialized")
+    for epoch in range(epochs):
+        offset = (epoch * batch_size) % (train_labels.shape[0] - batch_size)
+        batch_features = train_dataset[offset:(offset + batch_size), :, :, :]
+        batch_labels = train_labels[offset:(offset + batch_size), :]
+        train_neural_network(sess, optimizer, keep_probability, batch_features, batch_labels)
+        if epoch % 200 == 0:
+            print('Epoch {:>2}'.format(epoch + 1), end='')
+            print_stats(sess, batch_features, batch_labels, loss, accuracy)
+    
+    
+    # Save Model
+    save_path = saver.save(sess, "metas/my-model")
+    print("Model save in file: {}".format(save_path))
