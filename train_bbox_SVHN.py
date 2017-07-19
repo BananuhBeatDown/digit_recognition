@@ -79,5 +79,21 @@ clean_test_bbox = np.reshape(clean_test_bbox, (-1, 20))
 
 print(clean_train_bbox.shape, clean_valid_bbox.shape, clean_test_bbox.shape)
 
+# %%
 
+# INPUT LAYER:
+
+def neural_net_image_input(image_shape):
+    return tf.placeholder(tf.float32, shape=(None, image_shape[0], image_shape[1], image_shape[2]), name='x')
+
+
+def neural_net_bbox(n_classes):
+    return tf.placeholder(tf.float32, shape=(None, n_classes), name='y')
+
+
+def neural_net_keep_prob_input():
+    return tf.placeholder(tf.float32, name='keep_prob')
+
+
+tf.reset_default_graph()
 
