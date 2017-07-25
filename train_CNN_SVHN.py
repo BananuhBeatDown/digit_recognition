@@ -9,16 +9,11 @@ Created on Tue Jun 20 19:47:41 2017
 from __future__ import print_function
 from pickle_work_around import pickle_load
 import matplotlib.pyplot as plt
-import matplotlib.patches as patches
-import numpy as np
-import os
 import tensorflow as tf
 import random
 
-path = '/Users/matthew_green/Desktop/version_control/digit_recognition/metas'
-os.chdir(path)
 
-pickle_file = 'SVHN_multi_bbox_64.pickle'
+pickle_file = 'metas/MS_combo_32.pickle'
 
 load = pickle_load(pickle_file)
 train_dataset = load['train_dataset']
@@ -28,6 +23,7 @@ valid_labels = load['valid_labels']
 test_dataset = load['test_dataset']
 test_labels = load['test_labels']
 del load  # hint to help gc free up memory
+
 print('Training set', train_dataset.shape, train_labels.shape)
 print('Validation set', valid_dataset.shape, valid_labels.shape)
 print('Test set', test_dataset.shape, test_labels.shape)
@@ -38,7 +34,7 @@ print('Test set', test_dataset.shape, test_labels.shape)
 
 def displaySequence_test(n):
     fig,ax=plt.subplots(1)
-    plt.imshow(train_dataset[n].reshape(64, 64), cmap=plt.cm.Greys)
+    plt.imshow(train_dataset[n].reshape(32, 32), cmap=plt.cm.Greys)
     plt.show
     print ('Label : {}'.format(train_labels[n], cmap=plt.cm.Greys), n)
     print(n)
@@ -56,7 +52,7 @@ def neural_net_image_input(image_shape):
 
 
 def neural_net_label_input(n_classes):
-    return tf.placeholder(tf.float32, shape=(None, n_classes), name='y')
+    return tf.placeholder(tf.int32, shape=(None, n_classes), name='y')
 
 def neural_net_keep_prob_input():
     return tf.placeholder(tf.float32, name='keep_prob') 
@@ -120,16 +116,16 @@ def output(x_tensor, num_outputs):
     logits4 = tf.matmul(x_tensor, weight_variable(x_tensor, num_outputs)) + bias_variable(num_outputs)
     logits5 = tf.matmul(x_tensor, weight_variable(x_tensor, num_outputs)) + bias_variable(num_outputs)
     return [logits1, logits2, logits3, logits4, logits5]
-
+    
 # %%
 
 # CREATE A CONVOLUTION MODEL METHOD
 
-depth1 = 64
-depth2 = 128
-depth3 = 256
-depth_full1 = 512
-depth_full2 = 256
+depth1 = 16
+depth2 = 32
+depth3 = 64
+depth_full1 = 128
+depth_full2 = 64
 classes = 11
 
 
@@ -152,8 +148,8 @@ tf.reset_default_graph()
 
 
 # Inputs
-x = neural_net_image_input((64, 64, 1))
-y = neural_net_label_input(11)
+x = neural_net_image_input((32, 32, 1))
+y = neural_net_label_input(6)
 keep_prob = neural_net_keep_prob_input()
 
 
@@ -174,23 +170,31 @@ loss = tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logi
                           tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits2, labels=y[: ,2])) + \
                           tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits3, labels=y[: ,3])) + \
                           tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits4, labels=y[: ,4])) + \
-                          tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits5, labels=y[: ,5]))
+                          tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(logits=logits5, labels=y[: ,5]), name='loss')
 
+# %%
+
+prediction = tf.stack([logits1, logits2, logits3, logits4, logits5])
+prediction = tf.transpose(tf.argmax(prediction, 2))
+
+
+# %%
 
 global_step = tf.Variable(0)
-learning_rate = tf.train.exponential_decay(0.05, global_step, 100000, 0.95)
+learning_rate = tf.train.exponential_decay(0.05, global_step, 10000, 0.95)
 optimizer = tf.train.AdagradOptimizer(learning_rate).minimize(loss, global_step=global_step)
 
+# %%
 
 # Accuracy
-correct_pred = tf.equal([logits1, logits2, logits3, logits4, logits5], [y[1], y[2], y[3], y[4], y[5]])
+correct_pred = tf.equal(tf.to_int32(prediction), (y[:, 1:]))
 accuracy = tf.reduce_mean(tf.cast(correct_pred, tf.float32), name='accuracy')
 
 # %%
 
 # TRAINING METHOD
 
-def train_neural_network(session, optimizer, keep_probability, feature_batch, label_batch, bbox_batch):
+def train_neural_network(session, optimizer, keep_probability, feature_batch, label_batch):
     feed_dict = {
             x: feature_batch, 
             y: label_batch, 
@@ -199,48 +203,74 @@ def train_neural_network(session, optimizer, keep_probability, feature_batch, la
 
 # %%
     
-def print_stats(session, feature_batch, label_batch, cost, accuracy):
+def print_stats(session, feature_batch, label_batch, loss, accuracy):
     current_cost = session.run(
-        cost,
+        loss,
         feed_dict={x: feature_batch, y: label_batch, keep_prob: 1.})
+    
     valid_accuracy = session.run(
         accuracy,
-        feed_dict={x: valid_features, y: valid_labels, keep_prob: 1.})
-    print('Loss: {:<8.3} Valid Accuracy: {:<5.3}'.format(
-        current_cost,
-        valid_accuracy))
+        feed_dict={x: valid_dataset, y: valid_labels, keep_prob: 1.})
     
-# %%
+    test_accuracy = session.run(
+            accuracy,
+            feed_dict={x: test_dataset, y: test_labels, keep_prob: 1.})
+    
+    print(' Loss: {:<8.3} Valid Accuracy: {:<5.3}% Test Accuracy: {:<5.3}%'.format(
+       current_cost,
+        valid_accuracy * 100,
+        test_accuracy * 100))
 
 # %%
 
-steps = 20000
+epochs = 1001
+batch_size = 128
+keep_probability = 0.9375
 
-with tf.Session(graph=graph) as sess:
-    tf.global_variables_initializer().run()
+# %%
+
+save_model_path = 'metas/my_model'
+
+with tf.Session() as sess:
+    # Initializing the variables
+    sess.run(tf.global_variables_initializer())
     print("Initialized")
-    for step in range(steps):
-        offset = (step * batch_size) % (train_labels.shape[0] - batch_size)
-        batch_data = train_dataset[offset:(offset + batch_size), :, :, :]
+    
+    for epoch in range(epochs):
+        offset = (epoch * batch_size) % (train_labels.shape[0] - batch_size)
+        batch_features = train_dataset[offset:(offset + batch_size), :, :, :]
         batch_labels = train_labels[offset:(offset + batch_size), :]
-        batch_bbox = clean_train_bbox[offset:(offset + batch_size), :]
-        feed_dict = {tf_train_dataset : batch_data, tf_train_labels : batch_labels, tf_train_bbox: batch_bbox}
-        _, l, predictions, bbox_preds = sess.run(
-            [optimizer, loss, train_prediction, train_bbox_pred], feed_dict=feed_dict)
-        if step % 200 == 0:
-            print('Minibatch loss at step {}: {:.3f}'.format(step, l))
-            print('Minibatch accuracy: {:.3f}%'.format(accuracy(predictions, batch_labels[:, 1:6])))
-            print('Minibatch Bounding Box accuracy: {:.3f}%'.format(
-                    bb_intersection_over_union(bbox_preds, batch_bbox)))
-            print('Validation accuracy: {:.3f}%'.format(accuracy(valid_prediction.eval(), valid_labels[:, 1:6])))
-            print('Validation Bounding Box accuracy: {:.3f}%'.format(
-                           bb_intersection_over_union(valid_bbox_pred.eval(), clean_valid_bbox)))
-    print('Test accuracy: {0:.3f}%'.format(accuracy(test_prediction.eval(), test_labels[:, 1:6])))
-    print('Test Bounding Box accuracy: {:.3f}%'.format(
-                    bb_intersection_over_union(test_bbox_pred.eval(), clean_test_bbox)))
-    
-    # Save the variables to disk
-    save_path = saver.save(sess, "C:/Users/Matt Green/Desktop/digit_recognition/metas/bbox_model")
-    print("Model save in file: {}".format(save_path))    
+        train_neural_network(sess, optimizer, keep_probability, batch_features, batch_labels)
+        if epoch % 1000 == 0:
+            print('Epoch {:>2}'.format(epoch + 1), end='')
+            print_stats(sess, batch_features, batch_labels, loss, accuracy)
     
     
+    # Save Model
+    saver = tf.train.Saver()
+    save_path = saver.save(sess, save_model_path)
+    print("Model save in file {}".format(save_path))
+    
+# %%
+
+epochs = 10001
+
+with tf.Session() as sess:
+    new_saver = tf.train.import_meta_graph('metas/my_model.meta')
+    new_saver.restore(sess, tf.train.latest_checkpoint('metas'))
+    print("Model restored.")  
+    
+    print("Initialized")
+    for epoch in range(epochs):
+        offset = (epoch * batch_size) % (train_labels.shape[0] - batch_size)
+        batch_features = train_dataset[offset:(offset + batch_size), :, :, :]
+        batch_labels = train_labels[offset:(offset + batch_size), :]
+        train_neural_network(sess, optimizer, keep_probability, batch_features, batch_labels)
+        if epoch % 1000 == 0:
+            print('Epoch {:>2}'.format(epoch + 1), end='')
+            print_stats(sess, batch_features, batch_labels, loss, accuracy)
+    
+    
+    # Save Model
+    save_path = saver.save(sess, save_model_path)
+    print("Model save in file {}".format(save_path))
