@@ -150,3 +150,24 @@ def output(x_tensor, num_outputs):
     bbox_pred = (x_tensor, weight_variable(x_tensor, num_outputs)) + bias_variable(num_outputs)
     return bbox_pred
     
+# %%
+
+# CREATE A CONVOLUTION MODEL METHOD
+
+depth1 = 16
+depth2 = 32
+depth3 = 64
+depth_full1 = 128
+depth_full2 = 64
+classes = 11
+
+
+def conv_net(x, keep_prob):
+    model = conv2d_maxpool(x, depth1, (5,5), (1,1), (2,2), (2,2))
+    model = conv2d_maxpool(model, depth2, (3,3), (1,1), (2,2), (2,2))
+    model = conv2d_maxpool(model, depth3, (3,3), (1,1), (2,2), (2,2))
+    model = flatten(model)
+    model = fully_conn(model, depth_full1)
+    model = tf.nn.dropout(model, keep_prob)
+    model = fully_conn(model, depth_full2)
+    return output(model, classes)
