@@ -171,3 +171,25 @@ def conv_net(x, keep_prob):
     model = tf.nn.dropout(model, keep_prob)
     model = fully_conn(model, depth_full2)
     return output(model, classes)
+
+# %%
+
+# BUILD THE NEURAL NETWORK
+
+# Remove previous weights, bias, inputs, etc..
+tf.reset_default_graph()
+
+
+# Inputs
+x = neural_net_image_input((32, 32, 1))
+y = neural_net_bbox(20)
+keep_prob = neural_net_keep_prob_input()
+
+
+# Model
+bbox_pred = conv_net(x, keep_prob)
+
+
+# Name logits Tensor, so that is can be loaded from disk after training
+bbox_pred = tf.identity(bbox_pred, name='bbox_pred')
+
