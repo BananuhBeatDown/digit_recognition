@@ -116,3 +116,37 @@ def conv2d_maxpool(x_tensor, conv_num_outputs, conv_ksize, conv_strides, pool_ks
                          strides=[1, pool_strides[0], pool_strides[1], 1],
                          padding='SAME')
     return pool
+
+# %%
+
+# FLATTEN LAYER
+
+def flatten(x_tensor):
+    shaped = x_tensor.get_shape().as_list()
+    reshaped = tf.reshape(x_tensor, [-1, shaped[1] * shaped[2] * shaped[3]])
+    return reshaped
+
+# %%
+
+# FULLY CONNECTED LAYER:
+
+def fully_conn(x_tensor, num_outputs):
+    weight = tf.Variable(tf.truncated_normal(shape=[x_tensor.get_shape().as_list()[1], num_outputs], mean=0.0, stddev=0.1)) 
+    bias = tf.Variable(tf.zeros(shape=num_outputs))
+    return tf.nn.relu(tf.matmul(x_tensor, weight) + bias)
+
+# %%
+
+# OUTPUT LAYER:
+    
+def weight_variable(x_tensor, num_outputs):
+    initial = tf.truncated_normal(shape=[x_tensor.get_shape().as_list()[1], num_outputs], mean=0.0, stddev=0.1) 
+    return tf.Variable(initial)
+
+def bias_variable(num_outputs):
+    return tf.Variable(tf.zeros(shape=num_outputs))
+
+def output(x_tensor, num_outputs):
+    bbox_pred = (x_tensor, weight_variable(x_tensor, num_outputs)) + bias_variable(num_outputs)
+    return bbox_pred
+    
