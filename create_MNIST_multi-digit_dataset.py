@@ -325,7 +325,10 @@ displaySequence(random.randint(0, train_dataset.shape[0]))
 # Save the datasets as individually
 # labelled features in a pickle file. 
 
-pickle_file = 'metas/MNIST_multi_32.pickle'
+if not os.path.exists('pickles'):
+    os.makedirs('pickles')
+
+pickle_file = 'pickles/MNIST_multi_32.pickle'
 
 save = {
     'train_dataset': train_dataset,
@@ -341,4 +344,7 @@ pickle_dump(save, pickle_file)
 statinfo = os.stat(pickle_file)
 print('Compressed pickle size:', statinfo.st_size)
 
+# %%
 
+
+    
