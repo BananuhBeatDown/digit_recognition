@@ -36,13 +36,13 @@ Run the files in the order specified below.
 
 - Creates multi-digit MNIST 32x32 dataset
 
-<img src="https://user-images.githubusercontent.com/10539813/28746962-04d790f0-7495-11e7-85cc-1f4337941742.png", width="512">
+<img src="https://user-images.githubusercontent.com/10539813/28746962-04d790f0-7495-11e7-85cc-1f4337941742.png" width="512">
 
 `python create_bbox_SVHN_dataset.py` 
 
 - Creates SVHN 32x32 dataset with bounding boxes
 
-<img src="https://user-images.githubusercontent.com/10539813/28746964-0b39fb22-7495-11e7-93c6-7eb682c58720.png", width="512">
+<img src="https://user-images.githubusercontent.com/10539813/28746964-0b39fb22-7495-11e7-93c6-7eb682c58720.png" width="512">
 
 `python create_combined_dataset.py`
 
@@ -54,13 +54,14 @@ Run the files in the order specified below.
 
 - Create a grayscaled images from real world pictures
 
-<img src="https://user-images.githubusercontent.com/10539813/28746967-0d71c0e6-7495-11e7-8b95-d0c0d67913ce.png", width="512">
+<img src="https://user-images.githubusercontent.com/10539813/28746967-0d71c0e6-7495-11e7-8b95-d0c0d67913ce.png" width="512">
 
 `python train_digit_recognition_CNN.py`
 
 - Trains network on the combined dataset and outputs loss and accuracy data into tensorboard files
 
-<img src="https://user-images.githubusercontent.com/10539813/28746968-0ed0d3aa-7495-11e7-84c7-c8daf0a09e9c.png", width="512">
+<img src="https://user-images.githubusercontent.com/10539813/28746968-0ed0d3aa-7495-11e7-84c7-c8daf0a09e9c.png" width="512">
+
 
 **To view the tensorboard loss and accuracy outputs, follow [these instruntions](https://www.tensorflow.org/get_started/summaries_and_tensorboard#launching_tensorboard) from the tensorflow website.**
 
@@ -68,9 +69,10 @@ Run the files in the order specified below.
 
 - Trains the network on the SVHN bounding box dataset and outputs predicted bounding box examples on the real world dataset
 
-<img src="https://user-images.githubusercontent.com/10539813/28746969-102ab5ae-7495-11e7-984f-858cbc5b6783.png", width="512">
+<img src="https://user-images.githubusercontent.com/10539813/28746969-102ab5ae-7495-11e7-984f-858cbc5b6783.png" width="512">
 
-<img src="https://user-images.githubusercontent.com/10539813/28746999-9693646a-7495-11e7-84b1-84b1b3ed261c.png", width="256">
+
+<img src="https://user-images.githubusercontent.com/10539813/28746999-9693646a-7495-11e7-84b1-84b1b3ed261c.png" width="256">
 
 ## License
 The image_classification program is a public domain work, dedicated using [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). I encourage you to use it, and enhance your understanding of CNNs and the deep learning concepts therein. :)
