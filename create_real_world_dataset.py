@@ -16,7 +16,7 @@ from six.moves import cPickle as pickle
 
 
 rootdir = 'rgb_house_numbers'
-newdir = 'pickles/gray_house_numbers'
+newdir = 'gray_house_numbers'
 
 if not os.path.exists(newdir):
     os.makedirs(newdir)
@@ -25,7 +25,7 @@ i = 1
 for  subdir, dirs, pics in os.walk(rootdir): 
     for pic in pics:
         if os.path.exists(
-            'pickles/gray_house_numbers/gray_num_{}.png'.format(i)):
+            'gray_house_numbers/gray_num_{}.png'.format(i)):
             print('Image gray_num_{}.png already exists!'.format(i))
         else:
             img = Image.open('{}/{}'.format(rootdir, pic)).convert('L')
@@ -42,7 +42,7 @@ w = 0
 
 for  subdir, dirs, pics in os.walk(newdir): 
     for pic in pics:
-        img = Image.open('pickles/gray_house_numbers/{}'.format(pic))
+        img = Image.open('gray_house_numbers/{}'.format(pic))
         pixels = []
         pixels = np.array(img.getdata())
         pixels = (pixels - 128.) / 128.
