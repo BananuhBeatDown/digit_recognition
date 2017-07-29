@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 import random
 
+# Load MNIST and SVHN combo dataset
 
 pickle_file = 'pickles/MS_combo_32.pickle'
 
@@ -183,11 +184,15 @@ tf.summary.scalar('accuracy', accuracy)
 
 # %%
 
+# Merge tensorboard stats and designate folder to save them in
+
 merged = tf.summary.merge_all()
-valid_writer = tf.summary.FileWriter('./valid/7_VALID')
-train_writer = tf.summary.FileWriter('./train/7_VALID')
+valid_writer = tf.summary.FileWriter('./valid/new_run')
+train_writer = tf.summary.FileWriter('./train/new_run')
 
 # %%
+
+# Optimization algorithm
 
 global_step = tf.Variable(0, dtype=tf.int32, name='global_step')
 learning_rate = tf.train.exponential_decay(0.05, global_step, 10000, 0.95)
@@ -206,6 +211,8 @@ def train_neural_network(session, optimizer, keep_probability, feature_batch, la
 
 # %%
     
+# loss and accuracy for training and validation sets
+
 def print_stats(session, feature_batch, label_batch, loss, accuracy):
     current_cost = session.run(
         loss,
@@ -226,6 +233,8 @@ def print_stats(session, feature_batch, label_batch, loss, accuracy):
 
 # %%
 
+# Accuracy for testing dataset methods
+
 def print_test_stat(session, accuracy):
     test_accuracy = session.run(
             accuracy,
@@ -236,11 +245,15 @@ def print_test_stat(session, accuracy):
     
 # %%
 
+# Set CNN parameters
+
 epochs = 50001
 batch_size = 256
 keep_probability = 0.7
 
 # %%
+
+# Train the CNN
 
 save_model_path = 'metas/my_model'
 
@@ -272,38 +285,6 @@ with tf.Session() as sess:
     
     # Save Model
     saver = tf.train.Saver()
-    save_path = saver.save(sess, save_model_path, global_step=global_step)
+    save_path = saver.save(sess, save_model_path)
     print("Model save in file {}".format(save_path))
     
-# %%
-
-epochs = 20001
-
-with tf.Session() as sess:
-    new_saver = tf.train.import_meta_graph('metas/my_model-50001.meta')
-    new_saver.restore(sess, tf.train.latest_checkpoint('metas'))
-    print("Model restored.") 
-    
-    print("Initialized")
-    for epoch in range(70001, 70001 + epochs):
-        offset = (epoch * batch_size) % (train_labels.shape[0] - batch_size)
-        batch_features = train_dataset[offset:(offset + batch_size), :, :, :]
-        batch_labels = train_labels[offset:(offset + batch_size), :]
-        train_neural_network(sess, optimizer, keep_probability, batch_features, batch_labels)
-        if epoch % 100 == 0:
-            # print('Epoch {:>2}'.format(epoch + 1), end='')
-            # print_stats(sess, batch_features, batch_labels, loss, accuracy)
-            
-            t_summary, t_acc, t_l = sess.run([merged, accuracy, loss], feed_dict={x: batch_features, y: batch_labels, keep_prob: 1})
-            train_writer.add_summary(t_summary, epoch)
-            
-            v_summary, v_acc = sess.run([merged, accuracy], feed_dict={x: valid_dataset, y: valid_labels, keep_prob: 1.})
-            valid_writer.add_summary(v_summary, epoch)
-            
-        if epoch % 1000 == 0:
-            print(epoch)
-    print_test_stat(sess, accuracy)
-    
-    # Save Model
-    save_path = saver.save(sess, save_model_path, global_step=global_step)
-    print("Model save in file {}".format(save_path))
