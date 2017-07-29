@@ -18,6 +18,7 @@ from pickle_work_around import pickle_dump
 from six.moves.urllib.request import urlretrieve
 import random
 
+
 # URL for downloading the SVHN dataset
 url = 'http://ufldl.stanford.edu/housenumbers/'
 last_percent_reported = None
@@ -59,6 +60,8 @@ extra_filename = maybe_download('extra.tar.gz')
 # Extract the datasets
 
 np.random.seed(133)
+
+
 
 def maybe_extract(filename, force=False):
   root = os.path.splitext(os.path.splitext(filename)[0])[0]  # remove .tar.gz
@@ -235,10 +238,10 @@ def generate_dataset(data, folder):
             im_bwidth = np.amax(left) + width[np.argmax(left)] - im_bleft
             
             # 15% increase in each direction
-            im_top = im_btop - 0.15 * im_bheight
-            im_left = im_bleft - 0.15 * im_bwidth
             im_bottom = np.amin([(im_btop + 1.15 * im_bheight), im.size[1]])
             im_right = np.amin([(im_bleft + 1.15 * im_bwidth), im.size[0]])
+            im_top = im_btop - 0.15 * im_bheight
+            im_left = im_bleft - 0.15 * im_bwidth
             
             top_ratio = top - im_top
             left_ratio = left - im_left
@@ -300,17 +303,17 @@ print(extra_dataset.shape, extra_labels.shape, extra_bbox.shape)
 
 def displaySequence_test(n):
     fig,ax=plt.subplots(1)
-    plt.imshow(test_dataset[n].reshape(32, 32), cmap=plt.cm.Greys)
+    plt.imshow(train_dataset[n].reshape(32, 32), cmap=plt.cm.Greys)
     
     for i in np.arange(4):
-        rect = patches.Rectangle((test_bbox[n][1][i], test_bbox[n][0][i]),
-                                  test_bbox[n][3][i], test_bbox[n][2][i],
+        rect = patches.Rectangle((train_bbox[n][1][i], train_bbox[n][0][i]),
+                                  train_bbox[n][3][i], train_bbox[n][2][i],
                                   linewidth=1,edgecolor='r',facecolor='none')
         
         ax.add_patch(rect)                               
     plt.show
     
-    print ('Label : {}'.format(test_labels[n], cmap=plt.cm.Greys), n)
+    print ('Label : {}'.format(train_labels[n], cmap=plt.cm.Greys), n)
     print(n)
     
 # display random sample to check if data is ok after creating sequences
@@ -356,6 +359,7 @@ print(valid_dataset.shape, valid_labels.shape, valid_bbox.shape)
 # %%
 
 # Save dataset features to pickle file for later use
+
 pickle_file = 'pickles/SVHN_multi_bbox_32.pickle'
 
 save = {
