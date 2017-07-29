@@ -6,8 +6,6 @@ Created on Sat Jun 17 12:47:45 2017
 @author: matthew_green
 """
 
-# These are all the modules we'll be using later. Make sure you can import them
-# before proceeding further.
 
 from __future__ import print_function
 import matplotlib.pyplot as plt
@@ -20,9 +18,7 @@ from pickle_work_around import pickle_dump
 from six.moves.urllib.request import urlretrieve
 import random
 
-path = '/Users/matthew_green/Desktop/version_control/digit_recognition'
-os.chdir(path)
-
+# URL for downloading the SVHN dataset
 url = 'http://ufldl.stanford.edu/housenumbers/'
 last_percent_reported = None
 
@@ -42,7 +38,8 @@ def download_progress_hook(count, blockSize, totalSize):
       sys.stdout.flush()
       
     last_percent_reported = percent
-        
+
+# Download then SVHN dataset       
 def maybe_download(filename, force=False):
   """Download a file if not present, and make sure it's the right size."""
   if force or not os.path.exists(filename):
@@ -58,6 +55,8 @@ test_filename = maybe_download('test.tar.gz')
 extra_filename = maybe_download('extra.tar.gz')
 
 # %%
+
+# Extract the datasets
 
 np.random.seed(133)
 
@@ -81,6 +80,8 @@ test_folders = maybe_extract(test_filename)
 extra_folders = maybe_extract(extra_filename)
 
 # %%
+
+# Extract the boudning boxes
 
 import h5py
 
@@ -158,6 +159,8 @@ class DigitStructFile:
     
 # %%
 
+# Unpack the datasets
+
 fin = os.path.join(train_folders, 'digitStruct.mat')
 dsf = DigitStructFile(fin)
 train_data = dsf.getAllDigitStructure_ByDigit()
@@ -170,15 +173,20 @@ fin = os.path.join(extra_folders, 'digitStruct.mat')
 dsf = DigitStructFile(fin)
 extra_data = dsf.getAllDigitStructure_ByDigit()
 
-    
 # %%
 
 # Remove 6-digit pic and bad-pic from dataset
+
 train_data = np.delete(train_data, 29929, axis=0) # 6-digits
 
 extra_data = np.delete(extra_data, 43926, axis=0) # bad-pic
 
 # %%
+
+# Crop images based on max boudning box width and height:
+# Use max bounding box extremes for top, bottom, left, and right edges
+# then extend that boundary by 15% in each direction and crop the image 
+# based on those numbers and resize while maintaining aspect ratios
 
 train_folders = 'train'
 test_folders = 'test'
@@ -186,8 +194,7 @@ extra_folders = 'extra'
 
 np.set_printoptions(suppress=True)
 import PIL.Image as Image
-image_size = 64
-
+image_size = 32
 
 
 def generate_dataset(data, folder):
@@ -220,18 +227,18 @@ def generate_dataset(data, folder):
                 left[j] = boxes[j]['left']
                 height[j] = boxes[j]['height']
                 width[j] = boxes[j]['width']
-    
+            
+            # Begin resizing process while maintaining aspect ratios
             im_btop = np.amin(top)
             im_bleft = np.amin(left)
             im_bheight = np.amax(top) + height[np.argmax(top)] - im_btop
             im_bwidth = np.amax(left) + width[np.argmax(left)] - im_bleft
             
+            # 15% increase in each direction
             im_top = im_btop - 0.15 * im_bheight
             im_left = im_bleft - 0.15 * im_bwidth
             im_bottom = np.amin([(im_btop + 1.15 * im_bheight), im.size[1]])
             im_right = np.amin([(im_bleft + 1.15 * im_bwidth), im.size[0]])
-            # print(im_top, im_left, im_bottom, im_right)
-            # print(im.size)
             
             top_ratio = top - im_top
             left_ratio = left - im_left
@@ -240,10 +247,10 @@ def generate_dataset(data, folder):
             
             height_ratio = (height / (im_bottom - im_top)) * image_size
             width_ratio = (width / (im_right - im_left)) * image_size
-        
             
-            # print(top_ratio, left_ratio, height_ratio, width_ratio)
             bbox = [top_ratio, left_ratio, height_ratio, width_ratio]
+            
+            # create bounding boxes outside image for non-digits 
             bbox_single = np.ones(shape=(4, 5)) * -15.
             bbox_single[2:] = bbox_single[2:] + 25.
             for k in np.arange(4):
@@ -262,10 +269,9 @@ def generate_dataset(data, folder):
                 if bbox[3][l] == -15.0:
                     bbox[3][l] = 10.0
             
-            # print(bbox)
             bbox_dataset[i, :, :] = bbox[:, :]
-            # print(bbox_dataset[i])
             
+            # crop the images based on values obtained above
             im = im.crop((int(np.floor(im_left)), int(np.floor(im_top)), int(np.floor(im_right)),
                           int(np.floor(im_bottom)))).resize([image_size, image_size], Image.ANTIALIAS)
             im = np.dot(np.array(im, dtype='float32'), [[0.2989],[0.5870],[0.1140]]) # Changes RGB to grey-scale
@@ -277,6 +283,8 @@ def generate_dataset(data, folder):
         
     return dataset, labels, bbox_dataset
 
+
+# create the altered datasets
 train_dataset, train_labels, train_bbox = generate_dataset(train_data, train_folders)
 print(train_dataset.shape, train_labels.shape, train_bbox.shape)
 
@@ -288,9 +296,11 @@ print(extra_dataset.shape, extra_labels.shape, extra_bbox.shape)
 
 # %%
 
+# Test display for altered dataset
+
 def displaySequence_test(n):
     fig,ax=plt.subplots(1)
-    plt.imshow(test_dataset[n].reshape(64, 64), cmap=plt.cm.Greys)
+    plt.imshow(test_dataset[n].reshape(32, 32), cmap=plt.cm.Greys)
     
     for i in np.arange(4):
         rect = patches.Rectangle((test_bbox[n][1][i], test_bbox[n][0][i]),
@@ -308,7 +318,9 @@ displaySequence_test(random.randint(0, test_dataset.shape[0] - 1))
 
 # %%
 
-# Create new training and valid datasets by mixing original training and valid datasets
+# Create new training and valid datasets 
+# by mixing original training and valid datasets
+
 random.seed()
 
 n_labels = 10
@@ -337,7 +349,6 @@ train_dataset_t = np.concatenate((extra_dataset[train_index2,:,:,:], train_datas
 train_labels_t = np.concatenate((extra_labels[train_index2,:], train_labels[train_index,:]), axis=0)
 
 
-
 print(train_dataset_t.shape, train_labels_t.shape, train_bbox_t.shape)
 print(test_dataset.shape, test_labels.shape, test_bbox.shape)
 print(valid_dataset.shape, valid_labels.shape, valid_bbox.shape)
@@ -345,12 +356,12 @@ print(valid_dataset.shape, valid_labels.shape, valid_bbox.shape)
 # %%
 
 # Save dataset features to pickle file for later use
-pickle_file = '/Users/matthew_green/Desktop/version_control/digit_recognition/metas/SVHN_multi_bbox_64.pickle'
+pickle_file = 'pickles/SVHN_multi_bbox_32.pickle'
 
 save = {
-    'train_bbox': train_bbox_t,
-    'train_dataset': train_dataset_t,
-    'train_labels': train_labels_t,
+    'train_bbox': train_bbox,
+    'train_dataset': train_dataset,
+    'train_labels': train_labels,
     'valid_bbox': valid_bbox,
     'valid_dataset': valid_dataset,
     'valid_labels': valid_labels,
