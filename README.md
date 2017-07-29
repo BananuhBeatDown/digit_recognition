@@ -20,10 +20,10 @@ The images are 32x32x1 grayscale format with 32 representing the pixel width and
 
 ## Parameters
 
-`depth` - Alter the depths of the CNN layers using common memory sizes
-`epochs` - number of training iterations
-`batch_size` - set to highest number your machine has memory for during common memory sizes
-`keep_probability` - probability of keeping activation node in dropout layer
+- `depth` - Alter the depths of the CNN layers using common memory sizes
+- `epochs` - number of training iterations
+- `batch_size` - set to highest number your machine has memory for during common memory sizes
+- `keep_probability` - probability of keeping activation node in dropout layer
 
 
 ## Example Output
