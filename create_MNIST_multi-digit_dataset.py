@@ -23,8 +23,10 @@ import random
 import scipy
 import gzip
 
+
+# URL location for downloading the MNIST dataset
 SOURCE_URL = 'http://yann.lecun.com/exdb/mnist/'
-WORK_DIRECTORY = '/Users/matthew_green/Desktop/version_control/digit_recognition'
+WORK_DIRECTORY = 'pickles'
 
 def maybe_download(filename):
   """A helper to download the data files if not present."""
@@ -88,25 +90,25 @@ test_labels = extract_labels(test_labels_filename, 10000)
 
 # %%
 
-# Synthetic Dataset Creator (1 to 5 digits per 64x64 image)
+# Synthetic Dataset and Label Creator (1 to 5 digits per 32x32 image)
 
-def synthetic_dataset_generator(dataset, labels, num_samples, new_size=64):
+def synthetic_dataset_generator(dataset, labels, num_samples, new_size=32):
     
     trim_train_data = []
-    [trim_train_data.append(i[:, 5:25]) for i in dataset]
+    [trim_train_data.append(i[:, 5:25]) for i in dataset] # Trim the images for more compact final image
     trim_train_data = np.array(trim_train_data)
     dataset = trim_train_data
     
-    synthetic_dataset = np.ndarray(shape=(num_samples, new_size, new_size, 1))
-    synthetic_labels = np.array([])
+    synthetic_dataset = np.ndarray(shape=(num_samples, new_size, new_size, 1)) # Create array for new dataset
+    synthetic_labels = np.array([]) # Create array for corresponding labels
     data_labels = np.array([])   
     w = 0
     while w < num_samples:
-        i = np.random.randint(1, 6)
-        if i == 1:
-            rand1 = np.random.randint(0, dataset.shape[0])
+        i = np.random.randint(1, 6) # Randomly choose digit sequence to create
+        if i == 1: # signle digit
+            rand1 = np.random.randint(0, dataset.shape[0]) # Choose random image from MNIST dataset
             
-            filler = np.zeros(shape=(28, 4, 1)) - 0.5
+            filler = np.zeros(shape=(28, 4, 1)) - 0.5 # Fill remaining area 32x32 pixel area with zeros
             filled_train_data = np.array([np.hstack((filler, dataset[rand1], filler))])
 
             merged_train_data = np.ndarray(shape=(28, 28, 1), 
@@ -114,7 +116,7 @@ def synthetic_dataset_generator(dataset, labels, num_samples, new_size=64):
 
             temp = np.hstack([filled_train_data[0]])
             merged_train_data[:, :, :] = temp
-            temp_str = np.array([i, labels[rand1], 10, 10, 10, 10])
+            temp_str = np.array([i, labels[rand1], 10, 10, 10, 10]) # Create matching label, 10=empty digit
             data_labels = np.append(data_labels, temp_str)
 
             trial_train_dataset = []
@@ -124,19 +126,19 @@ def synthetic_dataset_generator(dataset, labels, num_samples, new_size=64):
                         shape=(new_size, new_size))
 
             temp = np.hstack(
-                        [scipy.misc.imresize(trial_train_dataset, (new_size, new_size))])
+                        [scipy.misc.imresize(trial_train_dataset, (new_size, new_size))]) # Resize data to 32x32
 
             resized_train_dataset[:, :] = temp
 
             resized_train_dataset_4d = np.reshape(
-                resized_train_dataset, (1, new_size, new_size, 1))
+                resized_train_dataset, (1, new_size, new_size, 1)) # Reshape data into final 4-d array
 
-            synthetic_dataset[w, :, :, :] = resized_train_dataset_4d
+            synthetic_dataset[w, :, :, :] = resized_train_dataset_4d # Add to the synthetic dataset
             
             w += 1
             
 
-        elif i == 2:
+        elif i == 2: # 2 digits
             rand1 = np.random.randint(0, dataset.shape[0])
             rand2 = np.random.randint(0, dataset.shape[0])
             
@@ -172,7 +174,7 @@ def synthetic_dataset_generator(dataset, labels, num_samples, new_size=64):
             w += 1
 
             
-        elif i == 3:
+        elif i == 3: # 3 digits
             rand1 = np.random.randint(0, dataset.shape[0])
             rand2 = np.random.randint(0, dataset.shape[0])
             rand3 = np.random.randint(0, dataset.shape[0])
@@ -209,7 +211,7 @@ def synthetic_dataset_generator(dataset, labels, num_samples, new_size=64):
             
             w += 1
 
-        elif i == 4:
+        elif i == 4: # 4 digits
             rand1 = np.random.randint(0, dataset.shape[0])
             rand2 = np.random.randint(0, dataset.shape[0])
             rand3 = np.random.randint(0, dataset.shape[0])
@@ -247,7 +249,7 @@ def synthetic_dataset_generator(dataset, labels, num_samples, new_size=64):
             
             w += 1
 
-        else:
+        else: # 5 digits
             rand1 = np.random.randint(0, dataset.shape[0])
             rand2 = np.random.randint(0, dataset.shape[0])
             rand3 = np.random.randint(0, dataset.shape[0])
@@ -290,9 +292,9 @@ def synthetic_dataset_generator(dataset, labels, num_samples, new_size=64):
             w += 1
 
     # This belongs here
-    synthetic_labels = np.reshape(data_labels, (-1, 6))
+    synthetic_labels = np.reshape(data_labels, (-1, 6)) # Reshape labels into Nx6 format
 
-    return synthetic_dataset, synthetic_labels
+    return synthetic_dataset, synthetic_labels # Return synthetic dataset and labels
 
 # %%
 
@@ -311,7 +313,7 @@ print(test_dataset.shape, test_labels.shape)
 # Test display of the new images from the train_dataset
 
 def displaySequence(n):
-    plt.imshow(train_dataset[n].reshape(64, 64), cmap=plt.cm.Greys)
+    plt.imshow(train_dataset[n].reshape(32, 32), cmap=plt.cm.Greys)
     plt.show()
     print ('Label : {}'.format(train_labels[n], cmap=plt.cm.Greys))
 
@@ -323,7 +325,7 @@ displaySequence(random.randint(0, train_dataset.shape[0]))
 # Save the datasets as individually
 # labelled features in a pickle file. 
 
-pickle_file = '/Users/matthew_green/Desktop/version_control/digit_recognition/metas/MNIST_multi_64.pickle'
+pickle_file = 'metas/MNIST_multi_32.pickle'
 
 save = {
     'train_dataset': train_dataset,
