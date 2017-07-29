@@ -36,9 +36,11 @@ print('Test set', test_dataset.shape, test_labels.shape)
 def displaySequence_test(n):
     fig,ax=plt.subplots(1)
     plt.imshow(train_dataset[n].reshape(32, 32), cmap=plt.cm.Greys)
-    plt.show
-    print ('Label : {}'.format(train_labels[n], cmap=plt.cm.Greys), n)
-    print(n)
+    plt.ion()
+    plt.show()
+    plt.pause(0.001)
+    print ('Label : {}'.format(train_labels[n], cmap=plt.cm.Greys))
+    input("Press [enter] to continue.")
     
     
 # display random sample to check if data is ok after creating sequences
@@ -73,12 +75,12 @@ def conv2d_maxpool(x_tensor, conv_num_outputs, conv_ksize, conv_strides, pool_ks
                      stddev=0.1))
     bias = tf.Variable(tf.zeros(shape=conv_num_outputs))
     
-    conv = tf.nn.conv2d(x_tensor, weight, strides=[1, conv_strides[0], conv_strides[1], 1], padding='VALID')
+    conv = tf.nn.conv2d(x_tensor, weight, strides=[1, conv_strides[0], conv_strides[1], 1], padding='SAME')
     hidden = tf.nn.relu(conv + bias)
     pool = tf.nn.max_pool(hidden,
                          ksize=[1, pool_ksize[0], pool_ksize[1], 1],
                          strides=[1, pool_strides[0], pool_strides[1], 1],
-                         padding='VALID')
+                         padding='SAME')
     return pool
 
 # %%
@@ -131,7 +133,7 @@ classes = 11
 
 
 def conv_net(x, keep_prob):
-    model = conv2d_maxpool(x, depth1, (5,5), (1,1), (2,2), (2,2))
+    model = conv2d_maxpool(x, depth1, (3,3), (1,1), (2,2), (2,2))
     model = conv2d_maxpool(model, depth2, (3,3), (1,1), (2,2), (2,2))
     model = conv2d_maxpool(model, depth3, (3,3), (1,1), (2,2), (2,2))
     model = flatten(model)
@@ -247,7 +249,7 @@ def print_test_stat(session, accuracy):
 
 # Set CNN parameters
 
-epochs = 50001
+epochs = 1001
 batch_size = 256
 keep_probability = 0.7
 
@@ -270,8 +272,8 @@ with tf.Session() as sess:
         batch_labels = train_labels[offset:(offset + batch_size), :]
         train_neural_network(sess, optimizer, keep_probability, batch_features, batch_labels)
         if epoch % 100 == 0:
-            # print('Epoch {:>2}'.format(epoch + 1), end='')
-            # print_stats(sess, batch_features, batch_labels, loss, accuracy)
+            print('Epoch {:>2}'.format(epoch + 1), end='')
+            print_stats(sess, batch_features, batch_labels, loss, accuracy)
             
             t_summary, t_acc, t_l = sess.run([merged, accuracy, loss], feed_dict={x: batch_features, y: batch_labels, keep_prob: 1})
             train_writer.add_summary(t_summary, epoch)
@@ -279,8 +281,6 @@ with tf.Session() as sess:
             v_summary, v_acc = sess.run([merged, accuracy], feed_dict={x: valid_dataset, y: valid_labels, keep_prob: 1.})
             valid_writer.add_summary(v_summary, epoch)
             
-        if epoch % 1000 == 0:
-            print(epoch)
     print_test_stat(sess, accuracy)
     
     # Save Model

@@ -47,7 +47,10 @@ def displaySequence_test(n):
                                   linewidth=1,edgecolor='r',facecolor='none')
         
         ax.add_patch(rect)
-    plt.show
+    plt.ion()
+    plt.show()
+    plt.pause(0.001)
+    input("Press [enter] to continue.")
     
 # display random sample to check if data is ok after creating sequences
 # displaySequence_test(random.randint(0, train_dataset.shape[0]))
@@ -86,8 +89,6 @@ test_bbox = clean_test_bbox
 del clean_train_bbox
 del clean_valid_bbox
 del clean_test_bbox
-
-print(train_bbox.shape, valid_bbox.shape, test_bbox.shape)
 
 # %%
 
@@ -337,7 +338,7 @@ def train_neural_network(session, optimizer, keep_probability, feature_batch, la
 
 # Set CNN parameters
 
-epochs = 10001
+epochs = 1001
 batch_size = 256
 keep_probability = 0.9375
 
@@ -368,7 +369,7 @@ with tf.Session() as sess:
 
     # Save Model
     saver = tf.train.Saver()
-    save_path = saver.save(sess, save_model_path, global_step=global_step)
+    save_path = saver.save(sess, save_model_path)
     print("Model save in file {}".format(save_path))
 
 # %%
@@ -389,7 +390,10 @@ with open(pickle_file, 'rb') as f:
 
 def real_displaySequence(n):
     plt.imshow(real_test_dataset[n].reshape(32, 32), cmap=plt.cm.Greys)
+    plt.ion()
     plt.show()
+    plt.pause(0.001)
+    input("Press [enter] to continue.")
 
 #display random sample to check if data is ok after creating sequences
 print('Real Dataset Image Test:')
@@ -409,9 +413,6 @@ with tf.Session() as sess:
     print("Initialized")
     # test_prediction = sess.run(test_prediction, feed_dict={tf_test_dataset : real_test_dataset})
     bbox_prediction = sess.run(bbox_pred, feed_dict={x : real_test_dataset, keep_prob: 1.})
-
-    print(bbox_prediction)
-
 
 # %%
 
@@ -447,4 +448,7 @@ for n in range(6):
     ax.add_patch(rect4)
     ax.add_patch(rect5)
     
+    plt.ion()
     plt.show()
+    plt.pause(0.001)
+    input("Press [enter] to continue.")

@@ -6,13 +6,6 @@ Created on Sun Jun 18 17:58:28 2017
 @author: matthew_green
 """
 
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Mar 28 14:22:25 2017
-
-@author: Matt Green
-"""
-
 from __future__ import print_function
 import matplotlib.pyplot as plt
 import numpy as np
@@ -21,6 +14,7 @@ from six.moves.urllib.request import urlretrieve
 from pickle_work_around import pickle_dump
 import random
 import scipy
+import scipy.misc
 import gzip
 
 
@@ -304,9 +298,9 @@ train_dataset, train_labels = synthetic_dataset_generator(train_data, training_l
 valid_dataset, valid_labels = synthetic_dataset_generator(train_data, training_labels, 9000)
 test_dataset, test_labels = synthetic_dataset_generator(test_data, test_labels, len(test_data))
 
-print(train_dataset.shape, train_labels.shape)
-print(valid_dataset.shape, valid_labels.shape)
-print(test_dataset.shape, test_labels.shape)
+print('Training set', train_dataset.shape, train_labels.shape)
+print('Validation set', valid_dataset.shape, valid_labels.shape)
+print('Testing set', test_dataset.shape, test_labels.shape)
 
 # %%
 
@@ -314,8 +308,12 @@ print(test_dataset.shape, test_labels.shape)
 
 def displaySequence(n):
     plt.imshow(train_dataset[n].reshape(32, 32), cmap=plt.cm.Greys)
+    plt.ion()
     plt.show()
+    plt.pause(0.001)
     print ('Label : {}'.format(train_labels[n], cmap=plt.cm.Greys))
+    input("Press [enter] to continue.")
+    
 
 #display random sample to check if data is ok after creating sequences
 displaySequence(random.randint(0, train_dataset.shape[0]))
@@ -343,8 +341,3 @@ pickle_dump(save, pickle_file)
 
 statinfo = os.stat(pickle_file)
 print('Compressed pickle size:', statinfo.st_size)
-
-# %%
-
-
-    

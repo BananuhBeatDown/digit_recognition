@@ -49,8 +49,7 @@ for  subdir, dirs, pics in os.walk(newdir):
         pixels = pixels.reshape(1, 32, 32, 1)
         real_test_dataset[w, :, :, :] = pixels
         w += 1
-print(real_test_dataset.shape)
-print(real_test_labels.shape)
+print('Real testing set', real_test_dataset.shape, real_test_labels.shape)
 
 # %%
 

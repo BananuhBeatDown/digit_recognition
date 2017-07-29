@@ -74,8 +74,11 @@ print('Test set', test_dataset.shape, test_labels.shape)
 
 def displaySequence(n):
     plt.imshow(train_dataset[n].reshape(32, 32), cmap=plt.cm.Greys)
+    plt.ion()
     plt.show()
+    plt.pause(0.001)
     print ('Label : {}'.format(train_labels[n], cmap=plt.cm.Greys))
+    input("Press [enter] to continue.")
 
 #display random sample to check if data is ok after creating sequences
 displaySequence(random.randint(0, train_dataset.shape[0]))

@@ -61,8 +61,6 @@ extra_filename = maybe_download('extra.tar.gz')
 
 np.random.seed(133)
 
-
-
 def maybe_extract(filename, force=False):
   root = os.path.splitext(os.path.splitext(filename)[0])[0]  # remove .tar.gz
   if os.path.isdir(root) and not force:
@@ -163,6 +161,8 @@ class DigitStructFile:
 # %%
 
 # Unpack the datasets
+
+print('Unpacking the datasets... this will take some time')
 
 fin = os.path.join(train_folders, 'digitStruct.mat')
 dsf = DigitStructFile(fin)
@@ -289,13 +289,13 @@ def generate_dataset(data, folder):
 
 # create the altered datasets
 train_dataset, train_labels, train_bbox = generate_dataset(train_data, train_folders)
-print(train_dataset.shape, train_labels.shape, train_bbox.shape)
+print('Training set', train_dataset.shape, train_labels.shape, train_bbox.shape)
 
 test_dataset, test_labels, test_bbox = generate_dataset(test_data, test_folders)
-print(test_dataset.shape, test_labels.shape, test_bbox.shape)
+print('Testing set', test_dataset.shape, test_labels.shape, test_bbox.shape)
 
 extra_dataset, extra_labels, extra_bbox = generate_dataset(extra_data, extra_folders)
-print(extra_dataset.shape, extra_labels.shape, extra_bbox.shape)
+print('Validation set', extra_dataset.shape, extra_labels.shape, extra_bbox.shape)
 
 # %%
 
@@ -312,9 +312,12 @@ def displaySequence_test(n):
         
         ax.add_patch(rect)                               
     plt.show
-    
+    plt.ion()
+    plt.show()
+    plt.pause(0.001)
+
     print ('Label : {}'.format(train_labels[n], cmap=plt.cm.Greys), n)
-    print(n)
+    input("Press [enter] to continue.")
     
 # display random sample to check if data is ok after creating sequences
 displaySequence_test(random.randint(0, test_dataset.shape[0] - 1))
@@ -352,9 +355,9 @@ train_dataset_t = np.concatenate((extra_dataset[train_index2,:,:,:], train_datas
 train_labels_t = np.concatenate((extra_labels[train_index2,:], train_labels[train_index,:]), axis=0)
 
 
-print(train_dataset_t.shape, train_labels_t.shape, train_bbox_t.shape)
-print(test_dataset.shape, test_labels.shape, test_bbox.shape)
-print(valid_dataset.shape, valid_labels.shape, valid_bbox.shape)
+print('Randomized Traing set', train_dataset_t.shape, train_labels_t.shape, train_bbox_t.shape)
+print('Randomized Validation set', valid_dataset.shape, valid_labels.shape, valid_bbox.shape)
+print('Testing set', test_dataset.shape, test_labels.shape, test_bbox.shape)
 
 # %%
 
