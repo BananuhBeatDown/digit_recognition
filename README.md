@@ -1,6 +1,6 @@
 # Convolutional Neural Network Digit Recognition and Bounding Box Prediction
 
-This program performs image recognition and bounding box recognition on a series of digtits ranging in squence from 1-5. comprised from  and  datasets using a Convolutional Neural Network (CNN), and also also perform bounding prediciton . The images from the [MNIST](http://yann.lecun.com/exdb/mnist/) and [SVHN](http://ufldl.stanford.edu/housenumbers/) datasets are preprocessed and normalized then used to train a CNN consisting of convolutional, max pooling, dropout, fully connected, and output layers.
+This program performs image and bounding box recognition on a series of digtits ranging in squence from 1-5 using a Convolutional Neural Network (CNN). The [MNIST](http://yann.lecun.com/exdb/mnist/) and [SVHN](http://ufldl.stanford.edu/housenumbers/) datasets are preprocessed and normalized then used to train a CNN consisting of convolutional, max pooling, dropout, fully connected, and output layers.
 
 ## Install
 
